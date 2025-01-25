@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useContext} from "react";
 import {
     View,
     Text,
@@ -8,7 +8,26 @@ import {
     TouchableOpacity
     } from "react-native";
 
+import { AuthContext } from "@/src/context/AuthContext";
+
 export default function SignIn() {
+
+    const {user} = useContext(AuthContext)
+
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+
+    function handleLogin() {
+      /// "5" == 5
+      /// =, receber numa vriavel, == valor, === tipo e valor
+      if (email === '' || password === '') return
+
+      console.log("testes");
+      console.log(email);
+      console.log(password);
+      
+    }
+
     return (
         <View style={styles.container}>
             <Image
@@ -16,11 +35,16 @@ export default function SignIn() {
                 source={require("@/src/assets/logo.png")}
             />
 
+            <Text style={{color: "#fff"}}>
+              {user?.email}
+            </Text>
+
             <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Digite seu email"
                   style={styles.input}
                   placeholderTextColor={'#f0f0f0'}
+                  onChangeText={setEmail}
                 />
 
                 <TextInput
@@ -28,9 +52,13 @@ export default function SignIn() {
                   style={styles.input}
                   placeholderTextColor={'#f0f0f0'}
                   secureTextEntry={true}
+                  onChangeText={setPassword}
                 />
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity 
+                style={styles.button}
+                onPress={handleLogin}
+                >
                   <Text style={styles.buttonText}>Acessar</Text>
                 </TouchableOpacity>
             </View>
@@ -64,7 +92,8 @@ const styles =  StyleSheet.create({
       borderRadius: 4,
       paddingHorizontal: 8,
       color: '#fff',
-    }, button: {
+    },
+     button: {
       width: '95%',
       height: 40,
       backgroundColor: '#3fffa3',
