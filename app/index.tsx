@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 export default function Index() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-  const isLoggin = true
-  const isLoading = true
+  const isAuthenticated = false
+  const isLoading = false
 
   useEffect(() => {
     // Marca como montado
@@ -16,14 +16,14 @@ export default function Index() {
   useEffect(() => {
     if (isMounted) {
       if (!isLoading) {
-        if (isLoggin) {
+        if (isAuthenticated) {
           router.replace("/Dashboard"); // Redireciona para Dashboard
         } else {
           router.replace("/SignIn"); // Redireciona para Login
         }
     }
     }
-  }, [isMounted, isLoggin, isLoading]);
+  }, [isMounted, isAuthenticated, isLoading]);
 
   return (
     <View
