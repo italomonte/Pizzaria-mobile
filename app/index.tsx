@@ -1,12 +1,14 @@
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "@/src/context/AuthContext";
+
 
 export default function Index() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-  const isAuthenticated = false
-  const isLoading = false
+
+  const {isAuthenticated} = useContext(AuthContext)
 
   useEffect(() => {
     // Marca como montado
@@ -14,16 +16,16 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    console.log(isAuthenticated);
+    
     if (isMounted) {
-      if (!isLoading) {
-        if (isAuthenticated) {
-          router.replace("/Dashboard"); // Redireciona para Dashboard
-        } else {
-          router.replace("/SignIn"); // Redireciona para Login
-        }
+      if (isAuthenticated) {
+        router.replace("/Dashboard"); // Redireciona para Dashboard
+      } else {
+        router.replace("/SignIn"); // Redireciona para Login
+      }
     }
-    }
-  }, [isMounted, isAuthenticated, isLoading]);
+  }, [isMounted, isAuthenticated]);
 
   return (
     <View
