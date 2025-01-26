@@ -16,7 +16,7 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    console.log(isAuthenticated);
+    console.log("IsAth: ", isAuthenticated);
     
     if (isMounted) {
       if (isAuthenticated) {

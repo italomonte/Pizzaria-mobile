@@ -6,13 +6,14 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator
 } from "react-native";
 import { useRouter } from "expo-router";
 
 import { AuthContext } from "@/src/context/AuthContext";
 
 export default function SignIn() {
-  const { signIn, isAuthenticated } = useContext(AuthContext);
+  const { signIn, isAuthenticated, loadingAuth } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +52,11 @@ export default function SignIn() {
         />
 
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Acessar</Text>
+          {loadingAuth ? (
+            <ActivityIndicator size={25} color={"white"}/>
+          ): (
+            <Text style={styles.buttonText}>Acessar</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>

@@ -1,11 +1,14 @@
-import React, {useState, createContext, ReactNode} from "react";
-import SessionStorage from 'react-native-session-storage';
+import React, {useState, createContext, ReactNode, useEffect} from "react";
 import { api } from "../services/api";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type AuthContextData = {
     user: UserProps
     isAuthenticated: boolean
     signIn: (credential: SignInProps)=> Promise<void>
+    loadingAuth: boolean
+    loading: boolean,
+    signOut: () => Promise<void>
 }
 
 type AuthProviderProps = {
@@ -36,8 +39,43 @@ export function AuthProvider({children}: AuthProviderProps) {
     })
 
     const [loadingAuth, setLoadingAuth] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     const isAuthenticated = (user.name !== '')
+
+    useEffect(() => {
+      async function getUser() {
+          try { 
+              const userInfo = await AsyncStorage.getItem('@pizzaToken');
+              console.log("UserInfo from storage:", userInfo);
+  
+              if (!userInfo) {
+                  console.log("No user found in storage.");
+                  return;
+              }
+  
+              const hasUser: UserProps = JSON.parse(userInfo);
+              console.log("Parsed User:", hasUser);
+  
+              if (Object.keys(hasUser).length > 0) {
+                  api.defaults.headers.common['Authorization'] = `Bearer ${hasUser.token}`;
+                  setUser({
+                      id: hasUser.id,
+                      name: hasUser.name,
+                      email: hasUser.email,
+                      token: hasUser.token,
+                  });
+
+                  setLoading(false)
+              }
+          } catch (error) {
+              console.error("Error fetching user from storage:", error);
+          }
+      }
+  
+      getUser();
+  }, []);
+  
 
     async function signIn({email, password}: SignInProps) {
 
@@ -57,7 +95,7 @@ export function AuthProvider({children}: AuthProviderProps) {
                 ...response.data
             } 
 
-            SessionStorage.setItem('@pizzaToken', JSON.stringify(data))
+            await AsyncStorage.setItem('@pizzaToken', JSON.stringify(data))
 
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`
 
@@ -74,9 +112,28 @@ export function AuthProvider({children}: AuthProviderProps) {
         
     }
 
+    async function signOut() {
+      await AsyncStorage.clear() 
+      .then(() => {
+        setUser({
+          id: '',
+          name: '',
+          email: '',
+          token: ''
+        })
+      })
+    }
 
     return(
-        <AuthContext.Provider value={{user, isAuthenticated, signIn}}>
+        <AuthContext.Provider 
+          value={{
+            user, 
+            isAuthenticated, 
+            signIn, 
+            loadingAuth, 
+            loading,
+            signOut
+            }}>
             {children}
         </AuthContext.Provider>
     )
