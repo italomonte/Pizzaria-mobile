@@ -47,15 +47,14 @@ export function AuthProvider({children}: AuthProviderProps) {
       async function getUser() {
           try { 
               const userInfo = await AsyncStorage.getItem('@pizzaToken');
-              console.log("UserInfo from storage:", userInfo);
+            //   console.log("UserInfo from storage:", userInfo);
   
               if (!userInfo) {
-                  console.log("No user found in storage.");
+                //   console.log("No user found in storage.");
                   return;
               }
   
               const hasUser: UserProps = JSON.parse(userInfo);
-              console.log("Parsed User:", hasUser);
   
               if (Object.keys(hasUser).length > 0) {
                   api.defaults.headers.common['Authorization'] = `Bearer ${hasUser.token}`;
@@ -106,7 +105,7 @@ export function AuthProvider({children}: AuthProviderProps) {
             setLoadingAuth(false)
 
         } catch (error) {
-            console.log("erro ao acesar: ", error)
+            // console.log("erro ao acesar: ", error)
             setLoadingAuth(false)
         }
         
