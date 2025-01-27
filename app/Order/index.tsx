@@ -1,20 +1,45 @@
-import React from "react"
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, TextInput} from "react-native"
+import React, {useState, useEffect} from "react"
 import { useLocalSearchParams} from "expo-router"
 import {Feather} from '@expo/vector-icons'
 import { api } from "@/src/services/api"
 import { useRouter } from "expo-router"
+import { ModalPicker } from "@/src/components/ModalPicker"
+import { View, Text, Modal, SafeAreaView, StyleSheet, TouchableOpacity, TextInput} from "react-native"
 
 type OrderParams = {
   number: string; 
   order_id: string; // Pode ajustar para `number` e converter depois
 };
 
+export type CategoryProps = {
+  id: string
+  name: string
+}
+
 export default function Order() {
 
   const router = useRouter()
   const {number, order_id} = useLocalSearchParams<OrderParams>()
   
+  const [category, setCategory] = useState<CategoryProps[] | []>([])
+  const [categorySelected, setCategorySelected] = useState<CategoryProps>()
+  const [modalCategoryVisible, setModalCategoryVisible] =  useState(false)
+
+  const [amount, setAmount] = useState('1')
+
+  useEffect(() => {
+    async function loadInfo() {
+      const response = await api.get('/category')
+
+      setCategory(response.data)
+      setCategorySelected(response.data[0])
+    };
+
+    loadInfo()
+
+
+  }, [])
+
   async function handleCloseOrder(){
     try {
       await api.delete('/order', {
@@ -28,8 +53,6 @@ export default function Order() {
       console.log(err);
     }
   }
-
-  console.log('local: ', number, order_id)
   
   return(
     
@@ -38,14 +61,17 @@ export default function Order() {
 
           <Text style={styles.title}>Mesa {number}</Text>
 
-          <TouchableOpacity>
-            <Feather name='trash-2' size={28} color={"#FF3F4b"} onPress={handleCloseOrder} />
-          </TouchableOpacity>
-
+          {category.length !== 0 && (
+            <TouchableOpacity>
+              <Feather name='trash-2' size={28} color={"#FF3F4b"} onPress={handleCloseOrder} />
+            </TouchableOpacity>
+          )}
         </View>
 
-        <TouchableOpacity style={styles.input}>
-          <Text style={{color: "#fff"}}>Pizzas</Text>
+        <TouchableOpacity style={styles.input} onPress={ () => setModalCategoryVisible(true)}>
+          <Text style={{color: "#fff"}}>
+            {categorySelected?.name}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.input}>
@@ -58,10 +84,10 @@ export default function Order() {
 
           <TextInput
             style={[styles.input, {width: '60%', textAlign: 'center'}]}
-            placeholder="1"
             placeholderTextColor={"#f0f0f0"}
             keyboardType="numeric"
-            value="1"
+            value={amount}
+            onChangeText={setAmount}
           />
 
         </View>
@@ -76,6 +102,20 @@ export default function Order() {
             <Text style={styles.buttonText}>Avançar</Text> 
           </TouchableOpacity>
         </View>
+
+        <Modal
+          transparent={true}
+          visible={modalCategoryVisible}
+          animationType="fade"
+        >
+          <ModalPicker
+            handleCloseModal= {() => setModalCategoryVisible(false)}
+            options={category}
+            selectedItem={() => {}}
+          />
+        </Modal>
+
+        
 
       </View>
   )
