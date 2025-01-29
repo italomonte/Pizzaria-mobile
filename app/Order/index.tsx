@@ -18,7 +18,7 @@ import {
 
 } from "react-native"
 
-type OrderParams = {
+export type OrderParams = {
   number: string; 
   order_id: string; // Pode ajustar para `number` e converter depois
 };
@@ -112,6 +112,27 @@ export default function Order() {
     setProductSelected(item)
   }
 
+  async function handleDeleteItem(item_id: string) {
+    try {
+      await api.delete('/order/remove', {
+        params: {
+          item_id: item_id
+        }
+      })
+
+      // removido
+
+      let removeItem = items.filter((item)=> {
+        return (item.id !== item_id)
+      })
+
+      setItems(removeItem)
+    } catch (err) {
+      console.log(err);
+      
+    }
+  }
+
   async function handleAdd(){
     const response = await api.post('/order/add', {
       order_id: order_id,
@@ -129,6 +150,13 @@ export default function Order() {
 
     setItems(oldArray => [...oldArray, data])
 
+  }
+
+  function handleNextPage () {
+    router.push({
+      pathname: '/(FinishOrder)/FinishOrder',
+      params: {number: number, order_id: order_id}
+    })
   }
   
   return(
@@ -190,6 +218,7 @@ export default function Order() {
           <TouchableOpacity 
           style={[styles.button, { opacity: items?.length === 0 ? 0.3 : 1}]}
           disabled={items?.length == 0}
+          onPress={handleNextPage}
           >
             <Text style={styles.buttonText}>Avançar</Text> 
           </TouchableOpacity>
@@ -202,7 +231,7 @@ export default function Order() {
           style={{ flex: 1, marginTop: 24 }}
           data={items}
           keyExtractor={(item) => item.id }
-          renderItem={ ({ item }) =>  <ListItem data={item} /> }
+          renderItem={ ({ item }) =>  <ListItem data={item} deleteItem={handleDeleteItem}/> }
         />
 
 
